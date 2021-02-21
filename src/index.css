@@ -10,3 +10,7 @@ body,
 input {
     font-family: 'Raleway', sans-serif;
 }
+
+body {
+    color: #444;
+}
