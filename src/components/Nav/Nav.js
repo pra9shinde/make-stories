@@ -1,21 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Nav.css';
 
+import { Link } from 'react-router-dom';
+
 const Nav = () => {
+    const [navbar, setNavbar] = useState(false);
+
+    const changeNavBg = () => {
+        if (window.scrollY >= 120) {
+            setNavbar(true);
+        } else {
+            setNavbar(false);
+        }
+    };
+
+    window.addEventListener('scroll', changeNavBg);
+
     return (
         <header className='header-area'>
             <div className='main-menu'>
-                <nav className='navbar'>
+                <nav className={`navbar ${navbar ? 'active' : ''}`}>
                     <div className='navbar-container max-window'>
-                        <a className='navbar-logo'>MakeStories</a>
+                        <Link className='navbar-logo' to='/'>
+                            MakeStories
+                        </Link>
 
                         <div className='nav-items'>
                             <ul className='nav-menu'>
                                 <li className='nav-item'>
-                                    <a href=''>Home</a>
-                                </li>
-                                <li className='nav-item'>
-                                    <a href=''>Logout</a>
+                                    <Link to='/auth'>Logout</Link>
                                 </li>
                             </ul>
                         </div>

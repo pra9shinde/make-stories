@@ -11,7 +11,7 @@ function App() {
     return (
         <BrowserRouter>
             <Route path='/auth' component={Auth} exact />
-            <Route path='/' component={Home} />
+            <Route path='/' component={Home} exact />
         </BrowserRouter>
     );
 }
