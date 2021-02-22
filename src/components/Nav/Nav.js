@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Nav.css';
 
 import { Link } from 'react-router-dom';
@@ -14,7 +14,15 @@ const Nav = () => {
         }
     };
 
-    window.addEventListener('scroll', changeNavBg);
+    useEffect(() => {
+        window.addEventListener('scroll', changeNavBg);
+
+        return () => {
+            //cleanup
+            setNavbar(false);
+            window.removeEventListener('scroll', changeNavBg);
+        };
+    }, []);
 
     return (
         <header className='header-area'>
