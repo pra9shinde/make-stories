@@ -69,13 +69,32 @@ const storage = multer.diskStorage({
         cb(null, Date.now() + '-' + file.originalname);
     },
 });
-const uploadStorage = multer({ storage: storage }).single('updateProfilePic');
+const uploadStorage = multer({
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype == 'image/png' || file.mimetype == 'image/jpg' || file.mimetype == 'image/jpeg') {
+            cb(null, true);
+        } else {
+            cb(null, false);
+            return cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
+        }
+    },
+}).single('updateProfilePic');
 
 exports.updateUser = (req, res, next) => {
     try {
         const errors = {};
 
         uploadStorage(req, res, async function (err) {
+            if (err) {
+                // file  handle error
+                errors.file = err.message;
+                return res.json({
+                    status: 'failure',
+                    errors: errors,
+                });
+            }
+
             const id = req.body.id;
             const password = req.body.password;
             const newPassword = req.body.newPassword;
