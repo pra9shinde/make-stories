@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
+import { useHistory } from 'react-router';
+import { toast } from 'react-toastify';
 
 import Nav from '../Nav/Nav';
 import ShowUser from './ShowUser/ShowUser';
@@ -19,8 +21,9 @@ const Home = () => {
     // Access Redux State
     const auth = useSelector((state) => state);
 
-    const [showEditUser, setShowEditUser] = useState(false);
+    let history = useHistory();
 
+    const [showEditUser, setShowEditUser] = useState(false);
     const [errors, setErrors] = useState({});
     const [values, setValues] = useState({
         email: '',
@@ -36,20 +39,24 @@ const Home = () => {
 
     useEffect(() => {
         // effect
-        axios
-            .post(`/user/${auth.user.id}`, { token: auth.token })
-            .then(function (response) {
-                if (Object.keys(response.data.errors).length > 0) {
-                    setErrors(response.data.errors);
-                } else {
-                    setValues({ ...values, ...response.data.user });
-                }
-            })
-            .catch(function (error) {
-                console.log('Home UseEffect');
-
-                setErrors({ ...errors, failure: error.message });
-            });
+        if (!auth.user) {
+            //Relogin Token Expired
+            toast.warning('🚀 Session Expired Re-Login ', { position: 'top-center' });
+            history.push('/auth');
+        } else {
+            axios
+                .post(`/user/${auth.user.id}`, { token: auth.token })
+                .then(function (response) {
+                    if (Object.keys(response.data.errors).length > 0) {
+                        setErrors(response.data.errors);
+                    } else {
+                        setValues({ ...values, ...response.data.user });
+                    }
+                })
+                .catch(function (error) {
+                    setErrors({ ...errors, failure: error.message });
+                });
+        }
     }, [auth]);
 
     return (

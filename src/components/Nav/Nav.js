@@ -2,8 +2,15 @@ import React, { useState, useEffect } from 'react';
 import './Nav.css';
 
 import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router';
+
+import { useDispatch } from 'react-redux'; //redux
+import { logout } from '../../store/actions/index'; //logout action of redux
 
 const Nav = () => {
+    const dispatch = useDispatch();
+    let history = useHistory();
+
     const [navbar, setNavbar] = useState(false);
 
     const changeNavBg = () => {
@@ -12,6 +19,11 @@ const Nav = () => {
         } else {
             setNavbar(false);
         }
+    };
+
+    const logoutHandler = () => {
+        dispatch(logout());
+        history.push('/auth');
     };
 
     useEffect(() => {
@@ -36,7 +48,8 @@ const Nav = () => {
                         <div className='nav-items'>
                             <ul className='nav-menu'>
                                 <li className='nav-item'>
-                                    <Link to='/auth'>Logout</Link>
+                                    <a onClick={logoutHandler}>Logout</a>
+                                    {/* <Link to='/auth'>Logout</Link> */}
                                 </li>
                             </ul>
                         </div>

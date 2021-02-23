@@ -133,7 +133,6 @@ exports.updateUser = (req, res, next) => {
 
             if (req.file) {
                 profilePic = 'uploads/' + req.file.filename;
-                console.log(profilePic);
             }
 
             const { valid, validationErrors } = validateUpdateUser(name, email);

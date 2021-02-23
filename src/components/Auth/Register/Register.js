@@ -85,7 +85,7 @@ const Register = () => {
                 if (Object.keys(response.data.errors).length > 0) {
                     setErrors(response.data.errors);
                 } else {
-                    toast.success('🚀 Profile Updated Successfully', { position: 'top-center' });
+                    toast.success('🚀 Registration Successfull', { position: 'top-center' });
 
                     //Redux action
                     dispatch(login(response.data.user, response.data.token));
