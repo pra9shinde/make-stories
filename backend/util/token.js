@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 
 // Create token
 exports.generateToken = (user) => {
-    console.log(user);
     return jwt.sign(
         {
             id: user.id,

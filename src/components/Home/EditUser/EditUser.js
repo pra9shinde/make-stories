@@ -1,8 +1,10 @@
 import React, { useRef, useState } from 'react';
 import './EditUser.css';
-import axios from '../../../axios';
+import axios, { SERVER_URL } from '../../../axios';
+import { toast } from 'react-toastify';
 
 import Button from '../../UI/Button/Button';
+import Loader from '../../UI/Loader/Loader';
 
 import ProfileImg from '../../../assets/images/test.jpg';
 import LockIcon from '@material-ui/icons/Lock';
@@ -10,16 +12,24 @@ import EnhancedEncryptionIcon from '@material-ui/icons/EnhancedEncryption';
 import FaceIcon from '@material-ui/icons/Face';
 import MailIcon from '@material-ui/icons/Mail';
 
-const EditUser = ({ clickHandler }) => {
-    const [currentProfilePic, setCurrentProfilePic] = useState(ProfileImg);
+import { useSelector, useDispatch } from 'react-redux'; //redux
+import { login } from '../../../store/actions/index'; //login action of redux
+
+const EditUser = ({ clickHandler, user }) => {
+    // Access Redux State
+    const auth = useSelector((state) => state);
+    const dispatch = useDispatch();
+
+    const [currentProfilePic, setCurrentProfilePic] = useState(`${SERVER_URL}/${user.profilePic}`);
     const [values, setValues] = useState({
-        name: '',
-        email: '',
+        name: user.name,
+        email: user.email,
         password: '',
-        confirmPassword: '',
+        newPassword: '',
     }); //textfields
     const [errors, setErrors] = useState({});
     const [imageFileObj, setImageFileObj] = useState({});
+    const [showLoader, setShowLoader] = useState(false);
 
     const inputFile = useRef(null);
 
@@ -53,10 +63,12 @@ const EditUser = ({ clickHandler }) => {
 
     const updateFormHandler = (e) => {
         e.preventDefault();
+        setShowLoader(true);
 
         const formData = new FormData(); //Needed to post files
-        formData.append('profilePic', imageFileObj);
-        formData.append('id', '6033eabcea3b9d2b502718ce'); //Dynamic Id from state
+        formData.append('updateProfilePic', imageFileObj);
+        formData.append('id', auth.user.id); //Dynamic Id from state
+        formData.append('token', auth.token); //Dynamic Id from state
 
         Object.keys(values).forEach(function (key) {
             formData.append(key, values[key]);
@@ -65,66 +77,84 @@ const EditUser = ({ clickHandler }) => {
         axios
             .post('/user/updateUser', formData)
             .then(function (response) {
+                setShowLoader(false);
+
                 if (Object.keys(response.data.errors).length > 0) {
                     setErrors(response.data.errors);
                 } else {
-                    console.log(response);
+                    dispatch(login(response.data.user, auth.token));
+                    toast.success('🚀 Profile Updated Successfully', { position: 'top-center' });
                 }
             })
             .catch(function (error) {
-                setErrors(error);
+                setShowLoader(false);
+
+                setErrors({ ...errors, failure: error.message });
             });
     };
 
     return (
-        <div className='user-content'>
-            <div className='user-details'>
-                <div className='user-picture edit-user'>
-                    <img src={currentProfilePic} alt='' className='user-image' />
-                    <div className='overlay'>
-                        <Button type='submit' value='Change' classesArr={['small', 'overlay-btn', 'transparent']} clickHandler={showInputDialog} />
+        <>
+            <div className='user-content'>
+                <div className='user-details'>
+                    <div className='user-picture edit-user'>
+                        <img src={currentProfilePic} alt='' className='user-image' />
+                        <div className='overlay'>
+                            <Button
+                                type='submit'
+                                value='Change'
+                                classesArr={['small', 'overlay-btn', 'transparent']}
+                                clickHandler={showInputDialog}
+                            />
+                        </div>
+                    </div>
+                    <div className='user-data'>
+                        <form className='update-user-form' onSubmit={updateFormHandler} encType='multipart/form-data'>
+                            <input type='file' name='updateProfilePic' ref={inputFile} onChange={fileDialogChange} style={{ display: 'none' }} />
+
+                            <h2 className='title'>Edit Details</h2>
+
+                            {Object.keys(errors).length > 0 && (
+                                <div className='form__errors'>
+                                    <ul className='errors-ul'>
+                                        {Object.values(errors).map((value, i) => (
+                                            <li key={i}>*{value}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            <div className='input-field'>
+                                <FaceIcon />
+                                <input type='text' name='name' placeholder='Name' onChange={textInputHandler} defaultValue={user.name} />
+                            </div>
+                            <div className='input-field'>
+                                <MailIcon />
+                                <input type='email' name='email' placeholder='Email' onChange={textInputHandler} defaultValue={user.email} />
+                            </div>
+                            <div className='input-field'>
+                                <LockIcon />
+                                <input type='password' name='password' placeholder='Old Password' onChange={textInputHandler} />
+                            </div>
+                            <div className='input-field'>
+                                <EnhancedEncryptionIcon />
+                                <input type='password' name='newPassword' placeholder='New Password' onChange={textInputHandler} />
+                            </div>
+                            <div className='user-btns'>
+                                {showLoader ? (
+                                    <Loader />
+                                ) : (
+                                    <>
+                                        <Button type='button' value='Back' classesArr={['solid']} clickHandler={clickHandler} />
+                                        <Button type='submit' value='Update' classesArr={['solid']} />
+                                    </>
+                                )}
+                            </div>
+                        </form>
                     </div>
                 </div>
-                <div className='user-data'>
-                    <form className='update-user-form' onSubmit={updateFormHandler} encType='multipart/form-data'>
-                        <input type='file' name='profilePic' ref={inputFile} onChange={fileDialogChange} style={{ display: 'none' }} />
-
-                        <h2 className='title'>Edit Details</h2>
-
-                        {Object.keys(errors).length > 0 && (
-                            <div className='form__errors'>
-                                <ul className='errors-ul'>
-                                    {Object.values(errors).map((value, i) => (
-                                        <li key={i}>*{value}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-
-                        <div className='input-field'>
-                            <FaceIcon />
-                            <input type='text' name='name' placeholder='Name' onChange={textInputHandler} />
-                        </div>
-                        <div className='input-field'>
-                            <MailIcon />
-                            <input type='email' name='email' placeholder='Email' onChange={textInputHandler} />
-                        </div>
-                        <div className='input-field'>
-                            <LockIcon />
-                            <input type='password' name='password' placeholder='Change Password' onChange={textInputHandler} />
-                        </div>
-                        <div className='input-field'>
-                            <EnhancedEncryptionIcon />
-                            <input type='password' name='confirmPassword' placeholder='Confirm Password' onChange={textInputHandler} />
-                        </div>
-                        <div className='user-btns'>
-                            <Button type='button' value='Back' classesArr={['solid']} clickHandler={clickHandler} />
-                            <Button type='submit' value='Update' classesArr={['solid']} />
-                        </div>
-                    </form>
-                </div>
             </div>
-        </div>
+        </>
     );
 };
 

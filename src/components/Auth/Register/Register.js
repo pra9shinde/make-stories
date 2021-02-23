@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useHistory } from 'react-router';
 import axios from '../../../axios';
+import { toast } from 'react-toastify';
 
 import PersonIcon from '@material-ui/icons/Person';
 import LockIcon from '@material-ui/icons/Lock';
@@ -10,13 +11,21 @@ import MailIcon from '@material-ui/icons/Mail';
 import AvatarImg from '../../../assets/images/avatar.svg';
 
 import Button from '../../UI/Button/Button';
+import Loader from '../../UI/Loader/Loader';
+
+import { useDispatch } from 'react-redux'; //redux
+import { login } from '../../../store/actions/index'; //login action of redux
 
 const Register = () => {
+    //Access Redux States, actions
+    const dispatch = useDispatch();
+
     let history = useHistory();
 
     // States
     const [currentProfilePic, setCurrentProfilePic] = useState(AvatarImg);
     const [imageFileObj, setImageFileObj] = useState({});
+    const [showLoader, setShowLoader] = useState(false);
 
     const [values, setValues] = useState({
         name: '',
@@ -60,6 +69,8 @@ const Register = () => {
     // Form Handlers
     const signupFormHandler = (e) => {
         e.preventDefault();
+        setShowLoader(true);
+
         const formData = new FormData(); //Needed to post files
         formData.append('profilePic', imageFileObj);
         Object.keys(values).forEach(function (key) {
@@ -69,16 +80,23 @@ const Register = () => {
         axios
             .post('/auth/register', formData)
             .then(function (response) {
+                setShowLoader(false);
+
                 if (Object.keys(response.data.errors).length > 0) {
                     setErrors(response.data.errors);
                 } else {
-                    console.log('success');
+                    toast.success('🚀 Profile Updated Successfully', { position: 'top-center' });
+
+                    //Redux action
+                    dispatch(login(response.data.user, response.data.token));
+
                     const userId = response.data.user.id;
                     history.push('/user/' + userId);
                 }
             })
             .catch(function (error) {
-                setErrors(error);
+                setShowLoader(false);
+                setErrors({ ...errors, failure: error.message });
             });
     };
 
@@ -121,7 +139,8 @@ const Register = () => {
                 <LockIcon />
                 <input type='password' name='confirmPassword' placeholder='Confirm Password' onChange={textInputHandler} />
             </div>
-            <Button type='submit' value='Sign up' classesArr={['solid']} />
+
+            {showLoader ? <Loader /> : <Button type='submit' value='Sign up' classesArr={['solid']} />}
         </form>
     );
 };

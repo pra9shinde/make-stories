@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router';
+import { toast } from 'react-toastify';
+
 import axios from '../../../axios';
 
 import PersonIcon from '@material-ui/icons/Person';
@@ -11,8 +13,15 @@ import GitHubIcon from '@material-ui/icons/GitHub';
 
 // Compnents
 import Button from '../../UI/Button/Button';
+import Loader from '../../UI/Loader/Loader';
 
-const Login = () => {
+import { useDispatch } from 'react-redux'; //redux
+import { login } from '../../../store/actions/index'; //login action of redux
+
+const Login = (props) => {
+    //Access Redux States, actions
+    const dispatch = useDispatch();
+
     let history = useHistory();
 
     const [values, setValues] = useState({
@@ -20,6 +29,7 @@ const Login = () => {
         password: '',
     }); //textfields
     const [errors, setErrors] = useState({});
+    const [showLoader, setShowLoader] = useState(false);
 
     // Text Input Change Handler
     function textInputHandler(event) {
@@ -28,21 +38,28 @@ const Login = () => {
 
     const loginFormHandler = (e) => {
         e.preventDefault();
+        setShowLoader(true);
 
         axios
             .post('/auth/login', values)
             .then(function (response) {
-                console.log(response);
+                setShowLoader(false);
 
                 if (Object.keys(response.data.errors).length > 0) {
                     setErrors(response.data.errors);
                 } else {
+                    toast.success('🚀 Login Successfully', { position: 'top-center' });
+
+                    //Redux action
+                    dispatch(login(response.data.user, response.data.token));
+
                     const userId = response.data.user.id;
                     history.push('/user/' + userId);
                 }
             })
             .catch(function (error) {
-                setErrors(error);
+                setShowLoader(false);
+                setErrors({ ...errors, failure: error.message });
             });
     };
 
@@ -69,7 +86,7 @@ const Login = () => {
                 <input type='password' name='password' placeholder='Password' onChange={textInputHandler} />
             </div>
 
-            <Button type='submit' value='Login' classesArr={['solid']} />
+            {showLoader ? <Loader /> : <Button type='submit' value='Login' classesArr={['solid']} />}
 
             <p className='social-text'>Or Sign in with social platforms</p>
             <div className='social-media'>

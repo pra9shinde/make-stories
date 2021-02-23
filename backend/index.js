@@ -15,12 +15,15 @@ const port = 4000;
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', 'http://localhost:3000'); // update to match the domain you will make the request from
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.setHeader('Access-Control-Allow-Methods', 'POST,GET,OPTIONS,PUT,DELETE');
     next();
 });
 
 app.use(express.urlencoded({ extended: true }));
 // app.use(express.static('uploads'));
-app.use(express.static(path.join(__dirname, 'uploads')));
+
+app.use('/uploads', express.static('uploads'));
+
 app.use(bodyParser.json());
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);

@@ -1,29 +1,30 @@
 import React from 'react';
 
-import ProfileImg from '../../../assets/images/test.jpg';
 import MailIcon from '@material-ui/icons/Mail';
 import FaceIcon from '@material-ui/icons/Face';
 
 import Button from '../../UI/Button/Button';
 
-const ShowUser = ({ clickHandler }) => {
+import { SERVER_URL } from '../../../axios';
+
+const ShowUser = ({ clickHandler, user }) => {
     return (
         <div className='user-content'>
             <div className='user-details'>
                 <div className='user-picture'>
-                    <img src={ProfileImg} alt='' className='user-image' />
+                    <img src={`${SERVER_URL}/${user.profilePic}`} alt='' className='user-image' />
                 </div>
                 <div className='user-data'>
-                    <h2>Pranav Shinde</h2>
+                    <h2>{user.name}</h2>
 
                     <div className='email-address'>
                         <MailIcon fontSize='large' />
-                        <h3>pranav@alacritylabs.com</h3>
+                        <h3>{user.email}</h3>
                     </div>
 
                     <div className='email-address'>
                         <FaceIcon fontSize='large' />
-                        <h3>pra9shinde</h3>
+                        <h3>{user.username}</h3>
                     </div>
 
                     <p>

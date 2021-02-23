@@ -31,10 +31,11 @@ exports.register = (req, res, next) => {
             });
         }
 
-        let profilePic = path.join('uploads', 'avatar.svg');
+        let profilePic = 'uploads/avatar.svg';
         if (req.file) {
             //If file is uploaded by user
-            profilePic = path.join('uploads', req.file.filename);
+            // profilePic = path.join('uploads', req.file.filename);
+            profilePic = 'uploads/' + req.file.filename;
         }
 
         // Validate and Add to DB
